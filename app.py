@@ -154,6 +154,45 @@ def delete_client(name: str):
     del clients[name]
     return jsonify({"message": f"Client '{name}' deleted"})
 
+@app.route("/calories", methods=["POST"])
+def estimate_calories():
+    """Estimate daily calories for a given weight and program."""
+    data = request.get_json(force=True)
+    weight = float(data.get("weight", 0))
+    program = data.get("program", "")
+
+    if weight <= 0:
+        return jsonify({"error": "weight must be > 0"}), 400
+    if program not in PROGRAMS:
+        return jsonify({"error": f"Unknown program: {program}"}), 400
+
+    return jsonify({"weight_kg": weight, "program": program,
+                    "estimated_calories": calculate_calories(weight, program)})
+
+
+@app.route("/bmi", methods=["POST"])
+def bmi():
+    """Calculate BMI and return risk category."""
+    data = request.get_json(force=True)
+    try:
+        weight = float(data["weight"])
+        height = float(data["height"])
+        bmi_value = calculate_bmi(weight, height)
+    except (KeyError, TypeError, ValueError) as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    if bmi_value < 18.5:
+        category, risk = "Underweight", "Potential nutrient deficiency."
+    elif bmi_value < 25:
+        category, risk = "Normal", "Low risk if active and strong."
+    elif bmi_value < 30:
+        category, risk = "Overweight", "Moderate risk; focus on adherence."
+    else:
+        category, risk = "Obese", "Higher risk; prioritize fat loss."
+
+    return jsonify({"bmi": bmi_value, "category": category, "risk_note": risk})
+
+
 # ── Entry point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
