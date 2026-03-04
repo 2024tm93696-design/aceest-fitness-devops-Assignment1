@@ -101,6 +101,59 @@ def get_program(program_name: str):
         return jsonify({"error": f"Program '{program_name}' not found"}), 404
     return jsonify({"program": program_name, "details": program})
 
+
+@app.route("/clients", methods=["GET"])
+def list_clients():
+    """Return all saved clients."""
+    return jsonify({"clients": list(clients.keys())})
+
+
+@app.route("/clients", methods=["POST"])
+def create_client():
+    """Create or update a client profile."""
+    data = request.get_json(force=True)
+
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "name is required"}), 400
+
+    program = data.get("program", "")
+    if program and program not in PROGRAMS:
+        return jsonify({"error": f"Unknown program: {program}"}), 400
+
+    weight = float(data.get("weight", 0))
+    age = int(data.get("age", 0))
+    adherence = int(data.get("adherence", 0))
+
+    calories = calculate_calories(weight, program) if weight and program else 0
+
+    clients[name] = {
+        "age": age,
+        "weight": weight,
+        "program": program,
+        "adherence": adherence,
+        "calories": calories,
+    }
+    return jsonify({"message": f"Client '{name}' saved", "client": clients[name]}), 201
+
+
+@app.route("/clients/<name>", methods=["GET"])
+def get_client(name: str):
+    """Return a single client's profile."""
+    client = clients.get(name)
+    if client is None:
+        return jsonify({"error": f"Client '{name}' not found"}), 404
+    return jsonify({"name": name, "profile": client})
+
+
+@app.route("/clients/<name>", methods=["DELETE"])
+def delete_client(name: str):
+    """Delete a client profile."""
+    if name not in clients:
+        return jsonify({"error": f"Client '{name}' not found"}), 404
+    del clients[name]
+    return jsonify({"message": f"Client '{name}' deleted"})
+
 # ── Entry point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
