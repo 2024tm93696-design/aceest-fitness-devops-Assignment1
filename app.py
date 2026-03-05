@@ -185,7 +185,7 @@ def bmi():
         category, risk = "Underweight", "Potential nutrient deficiency."
     elif bmi_value < 25:
         category, risk = "Normal", "Low risk if active and strong."
-    elif bmi_value <= 30:
+    elif bmi_value < 30:
         category, risk = "Overweight", "Moderate risk; focus on adherence."
     else:
         category, risk = "Obese", "Higher risk; prioritize fat loss."
