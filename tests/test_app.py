@@ -192,7 +192,7 @@ class TestBMIEndpoint:
         assert resp.get_json()["category"] == "Underweight"
 
     def test_bmi_overweight(self, client):
-        resp = client.post("/bmi", json={"weight": 85, "height": 168})
+        resp = client.post("/bmi", json={"weight": 85, "height": 169})
         assert resp.get_json()["category"] == "Overweight"
 
     def test_bmi_obese(self, client):
