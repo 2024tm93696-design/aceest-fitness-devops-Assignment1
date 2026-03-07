@@ -18,10 +18,10 @@ pipeline {
         stage('Environment Setup') {
             steps {
                 echo "Setting up Python virtual environment..."
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
+                bat '''
+                    python -m venv venv
+                    call venv\\Scripts\\activate.bat
+                    python -m pip install --upgrade pip
                     pip install -r requirements.txt
                     pip install flake8
                 '''
@@ -31,8 +31,8 @@ pipeline {
         stage('Lint') {
             steps {
                 echo "Running flake8 lint check..."
-                sh '''
-                    . venv/bin/activate
+                bat '''
+                    call venv\\Scripts\\activate.bat
                     flake8 app.py --count --select=E9,F63,F7,F82 --show-source --statistics
                 '''
             }
@@ -41,8 +41,8 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 echo "Running pytest suite..."
-                sh '''
-                    . venv/bin/activate
+                bat '''
+                    call venv\\Scripts\\activate.bat
                     pytest tests/ -v --tb=short --junitxml=test-results.xml
                 '''
             }
@@ -56,20 +56,15 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo "Building Docker image..."
-                sh "docker build -t ${APP_NAME}:${IMAGE_TAG} ."
-                sh "docker tag ${APP_NAME}:${IMAGE_TAG} ${APP_NAME}:latest"
+                bat "docker build -t %APP_NAME%:%IMAGE_TAG% ."
+                bat "docker tag %APP_NAME%:%IMAGE_TAG% %APP_NAME%:latest"
             }
         }
 
         stage('Docker Test') {
             steps {
                 echo "Running pytest inside Docker container..."
-                sh """
-                    docker run --rm \
-                        -v "\$(pwd)/tests:/app/tests" \
-                        ${APP_NAME}:latest \
-                        python -m pytest tests/ -v --tb=short
-                """
+                bat "docker run --rm -v \"%CD%/tests:/app/tests\" %APP_NAME%:latest python -m pytest tests/ -v --tb=short"
             }
         }
 
@@ -83,8 +78,7 @@ pipeline {
             echo "BUILD FAILED — check the console output above."
         }
         always {
-            // Clean up dangling images to save disk space
-            sh "docker image prune -f || true"
+            bat "docker image prune -f"
         }
     }
 }
