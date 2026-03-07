@@ -133,7 +133,7 @@ tests/test_app.py::TestBusinessLogic::test_calculate_bmi_normal          PASSED
 ### Build the image
 
 ```bash
-docker build -t aceest-fitness:latest .
+docker build -t aceest-app .
 ```
 
 ![Docker Build](screenshots/docker-build.png)
@@ -141,7 +141,7 @@ docker build -t aceest-fitness:latest .
 ### Run the container
 
 ```bash
-docker run -p 5000:5000 aceest-fitness:latest
+docker run -p 5000:5000 aceest-app
 # → API available at http://localhost:5000
 ```
 
@@ -158,10 +158,7 @@ docker run -p 5000:5000 aceest-fitness:latest
 ### Run tests inside the container
 
 ```bash
-docker run --rm \
-  -v "$(pwd)/tests:/app/tests" \
-  aceest-fitness:latest \
-  python -m pytest tests/ -v
+docker run --rm -v ${PWD}/tests:/app/tests aceest-app python -m pytest tests/ -v
 ```
 
 ![Docker Test](screenshots/docker-test.png)
@@ -279,17 +276,13 @@ Every push to any branch triggers the full pipeline, providing rapid feedback on
 ### Example: Create a client
 
 ```bash
-curl -X POST http://localhost:5000/clients \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Arjun","program":"Fat Loss (FL)","weight":75,"age":28,"adherence":80}'
+curl -X POST "http://localhost:5000/clients" -H "Content-Type: application/json" -d '{"name":"Arjun","program":"Fat Loss (FL)","weight":75,"age":28,"adherence":80}'
 ```
 
 ### Example: Estimate calories
 
 ```bash
-curl -X POST http://localhost:5000/calories \
-  -H "Content-Type: application/json" \
-  -d '{"weight":75,"program":"Muscle Gain (MG)"}'
+curl -X POST "http://localhost:5000/calories" -H "Content-Type: application/json" -d '{"weight":75,"program":"Muscle Gain (MG)"}'
 ```
 
 ---
