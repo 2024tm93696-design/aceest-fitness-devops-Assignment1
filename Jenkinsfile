@@ -46,7 +46,7 @@ pipeline {
                         sonar-scanner ^
                         -Dsonar.projectKey=aceest-fitness ^
                         -Dsonar.sources=. ^
-                        -Dsonar.host.url=http://host.docker.internal:9000 ^
+                        -Dsonar.host.url=http://localhost:9000 ^
                         -Dsonar.token=squ_bc6bbb3827287ef6d90a30ca4e0e3a471c30d5c4
                     """
                 }
