@@ -1,0 +1,79 @@
+# Production deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceest-fitness-production
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness-production
+    spec:
+      containers:
+      - name: aceest-fitness
+        image: akshaya45/aceest-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENV
+          value: "production"
+---
+# Shadow deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-shadow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceest-fitness-shadow
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness-shadow
+    spec:
+      containers:
+      - name: aceest-fitness
+        image: akshaya45/aceest-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: ENV
+          value: "shadow"
+---
+# Production service
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-production-service
+spec:
+  selector:
+    app: aceest-fitness-production
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+    nodePort: 30007
+---
+# Shadow service
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-shadow-service
+spec:
+  selector:
+    app: aceest-fitness-shadow
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+    nodePort: 30008
