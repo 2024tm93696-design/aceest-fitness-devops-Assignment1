@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aceest-fitness-aks
+  labels:
+    app: aceest-fitness-aks
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aceest-fitness-aks
+  template:
+    metadata:
+      labels:
+        app: aceest-fitness-aks
+    spec:
+      containers:
+      - name: aceest-fitness
+        image: akshaya45/aceest-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aceest-fitness-aks-service
+spec:
+  selector:
+    app: aceest-fitness-aks
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
